@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retail Rebate Portal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            color: #003366;
+            margin-bottom: 5px;
+        }
+
+        .brand-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-width: 700px;
+            margin: 0 auto 25px auto;
+            text-align: center;
+        }
+
+        .brand-container h3 {
+            margin-top: 0;
+            color: #003366;
+            margin-bottom: 15px;
+        }
+
+        .brand-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .brand-btn {
+            background-color: #003366;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .brand-btn:hover, .brand-btn.active {
+            background-color: #002244;
+            outline: 3px solid #ffc107;
+        }
+
+        .results-container {
+            max-width: 850px;
+            margin: 0 auto;
+        }
+
+        .rebate-page {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .rebate-page img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+        }
+
+        .print-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        button.print-action-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        button.print-action-btn:hover {
+            background-color: #218838;
+        }
+
+        @media print {
+            body {
+                background: #fff;
+                padding: 0;
+            }
+            .brand-container, .print-container, header {
+                display: none;
+            }
+            .rebate-page {
+                box-shadow: none;
+                border: none;
+                margin: 0;
+                padding: 0;
+                page-break-after: always;
+                page-break-inside: avoid;
+            }
+            .rebate-page img {
+                width: 100%;
+                max-height: 100vh;
+                object-fit: contain;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Retail Rebate Portal</h1>
+        <p>Click a brand below to view and print matching rebates.</p>
+    </header>
+
+    <div class="brand-container">
+        <h3>Select a Brand</h3>
+        <div class="brand-buttons" id="brandButtonsContainer">
+            <!-- Buttons load automatically -->
+        </div>
+    </div>
+
+    <div class="print-container" id="printArea" style="display: none;">
+        <button class="print-action-btn" onclick="window.print()">🖨️ Print Available Rebates for Selected Brand</button>
+    </div>
+
+    <div class="results-container" id="resultsArea"></div>
+
+    <script>
+        const rebateDatabase = {
+            "whirlpool": { name: "Whirlpool", pages: [1, 15] },
+            "maytag": { name: "Maytag", pages: [1, 15] },
+            "kitchenaid": { name: "KitchenAid", pages: [1, 14, 15] },
+            "samsung": { name: "Samsung", pages: [1, 5] },
+            "lg": { name: "LG / LG Studio", pages: [1, 3, 4] },
+            "frigidaire": { name: "Frigidaire", pages: [1, 7] },
+            "electrolux": { name: "Electrolux", pages: [1, 8, 9] },
+            "midea": { name: "Midea", pages: [1, 6] },
+            "ge": { name: "GE / Profile / Café", pages: [1, 10, 11, 12, 13] },
+            "napoleon": { name: "Napoleon Grills", pages: [1, 3] },
+            "sharp": { name: "Sharp", pages: [1, 3] }
+        };
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const container = document.getElementById("brandButtonsContainer");
+            for (const [id, brand] of Object.entries(rebateDatabase)) {
+                const btn = document.createElement("button");
+                btn.className = "brand-btn";
+                btn.textContent = brand.name;
+                btn.onclick = (e) => selectBrand(id, e);
+                container.appendChild(btn);
+            }
+        });
+
+        function selectBrand(brandId, event) {
+            document.querySelectorAll('.brand-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const resultsArea = document.getElementById("resultsArea");
+            const printArea = document.getElementById("printArea");
+            resultsArea.innerHTML = "";
+
+            if (!rebateDatabase[brandId]) {
+                printArea.style.display = "none";
+                return;
+            }
+
+            printArea.style.display = "block";
+            const brandData = rebateDatabase[brandId];
+
+            brandData.pages.forEach(pageNum => {
+                const card = document.createElement("div");
+                card.className = "rebate-page";
+                card.innerHTML = `
+                    <img src="page-${pageNum}.png" alt="Rebate Page ${pageNum}" loading="lazy">
+                `;
+                resultsArea.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>
